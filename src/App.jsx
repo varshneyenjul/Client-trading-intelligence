@@ -513,20 +513,22 @@ Return ONLY the JSON object, no other text.`;
       userPrompt = `Trading data to analyse:\n${tradeData}`;
     }
 
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userPrompt }],
-        }),
-      });
+    try {const res = await fetch("https://api.anthropic.com/v1/messages", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-api-key": "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",
+    "anthropic-version": "2023-06-01"
+  },
+  body: JSON.stringify({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1000,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }],
+  }),
+});
       const data = await res.json();
-      const raw = data.content?.map(b => b.text || "").join("") || "";
-
+const raw = data.content?.map(b => b.text || "").join("") || "";
       if (mode === "proactive") {
         try {
           const clean = raw.replace(/```json|```/g, "").trim();
