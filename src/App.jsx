@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react";//v2
 
 const API_KEY = "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";
 
