@@ -531,25 +531,29 @@ Return ONLY the JSON object, no other text.`;
       const data = await res.json();
 const raw = data.content?.map(b => b.text || "").join("") || "";
       if (mode === "proactive") {
-        try {
-          const clean = raw.replace(/```json|```/g, "").trim();
-          const parsed = JSON.parse(clean);
-          setOutput({ text: parsed.email, events: parsed.events || [] });
-          setEditText(parsed.email);
-        } catch {
-          setOutput({ text: raw, events: [] });
-          setEditText(raw);
-        }
-      } else {
-        setOutput({ text: raw, events: [] });
-        setEditText(raw);
-      }
-    } catch {
-      setOutput({ text: "Something went wrong. Please try again.", events: [] });
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "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",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+      const data = await res.json();
+      const raw = data.content?.[0]?.text || "";
+      setOutput({ text: raw, events: [] });
+      setEditText(raw);
+    } catch (err) {
+      setOutput({ text: "Error: " + err.message, events: [] });
     } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(isEditing ? editText : output?.text || "");
