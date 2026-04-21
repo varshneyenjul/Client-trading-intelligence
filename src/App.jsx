@@ -1,6 +1,4 @@
-import { useState } from "react";//v2
-
-const API_KEY = "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";
+import { useState } from "react";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap');
@@ -88,33 +86,14 @@ export default function App() {
     setOutput(null);
     setEvents([]);
 
-    const systemPrompt = mode === "reactive"
-      ? `You are a senior relationship manager at a financial services brokerage. Write a clear, reassuring, plain-English email reply to a client about their trading account. Tone: ${tone.toLowerCase()}. Client segment: ${segment}${clientName ? `, name: ${clientName}` : ""}. No jargon. End with a clear next step. Include Subject line.`
-      : `You are a client alert system for a brokerage. Analyze the trading data and return ONLY a JSON object like this: {"events":[{"severity":"high","description":"..."}],"email":"full alert email with Subject line"}. Tone: ${tone.toLowerCase()}. Segment: ${segment}${clientName ? `, name: ${clientName}` : ""}. Be calm and solution-focused.`;
-
-    const userPrompt = mode === "reactive"
-      ? `Trading data:\n${tradeData}\n\n${clientQuery ? `Client question: "${clientQuery}"\n\n` : ""}Write a professional reply.`
-      : `Analyze this trading data and return JSON:\n${tradeData}`;
-
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1000,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userPrompt }]
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tradeData, clientName, segment, tone, mode, clientQuery }),
       });
-
       const data = await res.json();
-      const raw = data?.content?.[0]?.text || "";
+      const raw = data.result || "";
 
       if (mode === "proactive") {
         try {
