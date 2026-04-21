@@ -1,4 +1,6 @@
-export default async function handler(req, res) {
+const https = require('https');
+
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ result: 'Method not allowed' });
   }
@@ -14,23 +16,38 @@ export default async function handler(req, res) {
       ? `Trading data:\n${tradeData}\n\n${clientQuery ? `Client question: "${clientQuery}"\n\n` : ''}Write a professional reply.`
       : `Analyze this and return JSON:\n${tradeData}`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': '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',
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
+    const payload = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
-    const text = await response.text();
-    const data = JSON.parse(text);
+    const result = await new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'api.anthropic.com',
+        path: '/v1/messages',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': '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',
+          'anthropic-version': '2023-06-01',
+          'Content-Length': Buffer.byteLength(payload),
+        },
+      };
+
+      const request = https.request(options, (response) => {
+        let data = '';
+        response.on('data', (chunk) => { data += chunk; });
+        response.on('end', () => { resolve(data); });
+      });
+
+      request.on('error', reject);
+      request.write(payload);
+      request.end();
+    });
+
+    const data = JSON.parse(result);
     const raw = data?.content?.[0]?.text || '';
 
     if (mode === 'proactive') {
@@ -48,4 +65,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(200).json({ result: 'Error: ' + err.message, events: [] });
   }
-}
+};
