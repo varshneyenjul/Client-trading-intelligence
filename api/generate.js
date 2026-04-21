@@ -54,7 +54,7 @@ Return ONLY the JSON object, no other text.`;
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        ''x-api-key': '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',
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
