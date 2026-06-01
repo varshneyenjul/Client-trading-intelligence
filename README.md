@@ -7,7 +7,13 @@ AI-powered tool for financial services teams to generate reactive client replies
 **Reactive mode** — paste a client's trading history, get a clear plain-English reply ready to send.
 
 **Proactive mode** — paste trading activity, AI detects significant events (large losses, margin warnings, auto-closures) and drafts a proactive alert before the client calls.
+## Why I built this
 
+Working in FX brokerage made me curious about how AI could support client-facing teams in real time. I built this as a personal project to explore that idea and deepen my hands-on understanding of AI-powered product development.
+
+## Built with
+
+Claude API (Anthropic) · Python · Streamlit
 ---
 
 ## Deploy to Vercel
